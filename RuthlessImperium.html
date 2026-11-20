@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ruthless Imperium</title>
+<style>
+:root{--bg:#02060f;--ink:#e8f1ff;--mute:#8da2c4;--blue:#2f8cff;--glow:#5cc8ff;--silver:#dfe8f5;--card:rgba(20,40,80,.35);--line:rgba(160,200,255,.18);
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow-x:hidden}
+canvas#wave{position:fixed;inset:0;width:100%;height:100%;z-index:0}
+canvas#bolt{position:fixed;inset:0;width:100%;height:100%;z-index:3;pointer-events:none}
+header{position:fixed;top:0;left:0;right:0;z-index:5;display:flex;justify-content:space-between;align-items:center;padding:14px 5vw;padding-top:calc(14px + env(safe-area-inset-top,0px));backdrop-filter:blur(10px);background:linear-gradient(#02060fcc,transparent)}
+.logo{font-weight:800;letter-spacing:.3em;color:var(--silver)}
+.logo b{color:var(--glow)}
+nav{display:flex;gap:6px;overflow-x:auto}
+nav a{color:var(--mute);text-decoration:none;font-size:13px;padding:6px 12px;border-radius:99px;border:1px solid transparent;transition:.3s;white-space:nowrap}
+nav a:hover,nav a.on{color:var(--silver);border-color:var(--line);background:var(--card);box-shadow:0 0 18px #2f8cff55}
+#snd{cursor:pointer;background:var(--card);color:var(--silver);border:1px solid var(--line);border-radius:99px;padding:8px 14px;font-size:13px}
+main{position:relative;z-index:2}
+section{min-height:100vh;padding:110px 6vw 70px;display:flex;flex-direction:column;justify-content:center}
+.rv{opacity:0;transform:translateY(60px) scale(.96);filter:blur(8px);transition:1s cubic-bezier(.2,.8,.2,1)}
+.in .rv,.rv.in{opacity:1;transform:none;filter:none}
+h1{font-size:clamp(40px,9vw,120px);line-height:.95;font-weight:900;letter-spacing:-.03em;background:linear-gradient(100deg,var(--silver),var(--glow) 45%,var(--silver));-webkit-background-clip:text;background-clip:text;color:transparent;background-size:200%;animation:sh 6s linear infinite}
+@keyframes sh{to{background-position:200%}}
+h2{font-size:clamp(28px,5vw,56px);margin-bottom:8px;color:var(--silver)}
+h2 span{color:var(--glow)}
+p.lead{color:var(--mute);max-width:560px;margin:18px 0 28px;line-height:1.6}
+.btn{display:inline-block;cursor:pointer;border:1px solid var(--glow);color:var(--silver);background:linear-gradient(135deg,#2f8cff55,transparent);padding:14px 28px;border-radius:99px;text-decoration:none;box-shadow:0 0 28px #2f8cff66;transition:.3s}
+.btn:hover{transform:translateY(-3px);box-shadow:0 0 44px #5cc8ffaa}
+.row{display:flex;gap:18px;overflow-x:auto;scroll-snap-type:x mandatory;padding:30px 4px 24px}
+.pc{flex:0 0 min(300px,78vw);scroll-snap-align:center;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:26px;backdrop-filter:blur(12px);transition:.4s;cursor:pointer}
+.pc:hover{transform:translateY(-14px) scale(1.04);border-color:var(--glow);box-shadow:0 18px 50px #2f8cff55}
+.pc{display:block;text-decoration:none;color:inherit;overflow:hidden}.pic{height:180px;margin:-26px -26px 16px;background-size:cover;background-position:center;transition:transform .6s}.pc:hover .pic{transform:scale(1.1)}.go{display:inline-block;margin-top:12px;color:var(--glow);font-size:13px;letter-spacing:.08em}
+.pc h3{margin:14px 0 6px;color:var(--silver)}
+.pc p{color:var(--mute);font-size:14px;line-height:1.5}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:20px;margin-top:26px;perspective:900px}
+.dev{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:24px;text-align:center;transition:transform .15s,border-color .3s;transform-style:preserve-3d;backdrop-filter:blur(12px)}
+.dev:hover{border-color:var(--silver);box-shadow:0 0 36px #dfe8f544}
+.av{width:84px;height:84px;border-radius:50%;margin:0 auto 14px;display:grid;place-items:center;font-size:30px;font-weight:800;color:#02060f;background:conic-gradient(var(--silver),var(--glow),var(--silver));box-shadow:0 0 24px var(--glow)}
+.dev h3{color:var(--silver);font-size:18px}
+.dev small{color:var(--glow);letter-spacing:.12em;text-transform:uppercase;font-size:11px}
+.dev p{color:var(--mute);font-size:13px;margin-top:8px}
+footer{position:relative;z-index:2;text-align:center;color:var(--mute);padding:40px 6vw 60px;font-size:13px}
+#gate{position:fixed;inset:0;z-index:20;background:#02060f;display:grid;place-items:center;text-align:center;transition:opacity 1s}
+#gate.off{opacity:0;pointer-events:none}
+</style>
+</head>
+<body>
+<div id="gate"><div><div class="logo" style="font-size:28px;margin-bottom:18px">Ruthless<b>Imperium</b></div><p class="lead" style="margin:0 auto 24px">Turn your sound on for the full experience.</p><button class="btn" id="enter">Enter</button></div></div>
+<canvas id="wave"></canvas><canvas id="bolt"></canvas>
+<header><div class="logo">Ruthless<b>Imperium</b></div><nav id="nav"></nav><button id="snd">🔊 Sound on</button></header>
+<main>
+<section id="home"><h1 class="rv">WhatsApp<br>Tech, Reimagined.</h1><p class="lead rv">We build bots, automation and business tools that live inside WhatsApp — fast, reliable, and made by a team that loves the craft.</p><div class="rv"><a class="btn" href="#products">Explore products</a></div></section>
+<section id="products"><h2 class="rv">Our <span>Products</span></h2><p class="lead rv" style="margin-bottom:0">Swipe or scroll sideways through the menu.</p><div class="row rv" id="prod"></div></section>
+<section id="team"><h2 class="rv">Meet the <span>Developers</span></h2><p class="lead rv" style="margin-bottom:0">Every mind behind the code.</p><div class="grid" id="devs"></div></section>
+<section id="contact"><h2 class="rv">Let’s <span>build</span> together</h2><p class="lead rv">Need a WhatsApp bot or custom tool? Talk to us.</p><div class="rv"><a class="btn" id="wa" href="https://whatsapp.com/channel/0029VbDlfld4yltRwFKFL73X">Chat on WhatsApp</a></div></section>
+</main>
+<footer>© RUthlessImperium — built for Efficiency.</footer>
+<script>
+// company data
+const CONFIG={
+ products:[
+  {i:"🤖",u:"https://wa.me/",img:"",n:"SC MD Ruthless",d:"Multi-feature WhatsApp bot: menus, games, stickers, downloaders and moderation."},
+  {i:"🖥️",u:"https://wa.me/",img:"",n:"APK BUG Ruthless",d:"Apk Bug."}],
+ devs:[
+  {n:"Fizz",r:"Developer",d:"Architecture & core bot engine."},
+  {n:"Rahz",r:"Developer",d:"Software development."},
+  {n:"Calver",r:"Developer",d:"Backend developer."}],
+};
+// ====== build content ======
+const $=s=>document.querySelector(s);
+// u = link opened on click, img = picture (data: URI). Empty img → auto-generated cover.
+const ph=p=>"data:image/svg+xml,"+encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 240'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#0b2a6b'/><stop offset='.6' stop-color='#2f8cff'/><stop offset='1' stop-color='#dfe8f5'/></linearGradient></defs><rect width='400' height='240' fill='url(#g)'/><circle cx='320' cy='40' r='90' fill='#ffffff' opacity='.12'/><text x='200' y='145' font-size='88' text-anchor='middle'>${p.i}</text></svg>`);
+$("#prod").innerHTML=CONFIG.products.map(p=>`<a class="pc" href="${p.u}" target="_blank" rel="noopener"><div class="pic" style="background-image:url('${p.img||ph(p)}')"></div><h3>${p.n}</h3><p>${p.d}</p><span class="go">OPEN →</span></a>`).join("");
+document.querySelectorAll(".pc").forEach(c=>c.addEventListener("click",()=>started&&chime()));
+$("#devs").innerHTML=CONFIG.devs.map(d=>`<div class="dev rv"><div class="av">${d.n.trim()[0]}</div><h3>${d.n}</h3><small>${d.r}</small><p>${d.d}</p></div>`).join("");
+if(CONFIG.phone)$("#wa").href="https://whatsapp.com/channel/0029VbDlfld4yltRwFKFL73X";
+const secs=[...document.querySelectorAll("section")];
+$("#nav").innerHTML=secs.map(s=>`<a href="#${s.id}">${s.id[0].toUpperCase()+s.id.slice(1)}</a>`).join("");
+// ====== reveal + active nav ======
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("in");
+ document.querySelectorAll("nav a").forEach(a=>a.classList.toggle("on",a.hash==="#"+e.target.id));
+ if(e.target.tagName==="SECTION"&&started){chime();bolt()}}}),{threshold:.35});
+secs.forEach(s=>io.observe(s));
+const io2=new IntersectionObserver(es=>es.forEach(e=>e.isIntersecting&&e.target.classList.add("in")),{threshold:.2});
+document.querySelectorAll(".rv").forEach(r=>io2.observe(r));
+// ====== 3D tilt ======
+document.querySelectorAll(".dev").forEach(c=>{
+ c.addEventListener("mousemove",e=>{const r=c.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;c.style.transform=`rotateY(${x*18}deg) rotateX(${-y*18}deg) translateZ(10px)`});
+ c.addEventListener("mouseleave",()=>c.style.transform="");
+ c.addEventListener("mouseenter",()=>started&&blip(900));
+});
+document.querySelectorAll(".pc").forEach(c=>c.addEventListener("mouseenter",()=>started&&blip(660)));
+// ====== XMB-style wave background ======
+const cv=$("#wave"),cx=cv.getContext("2d");let W,H,sc=0,tsc=0;
+function rs(){W=cv.width=innerWidth;H=cv.height=innerHeight}rs();addEventListener("resize",rs);
+function wave(t){
+ sc+=(tsc-sc)*.05;
+ const g=cx.createLinearGradient(0,0,0,H);g.addColorStop(0,"#031330");g.addColorStop(1,"#02060f");cx.fillStyle=g;cx.fillRect(0,0,W,H);
+ const L=[{a:60,f:.0035,s:.5,c:"rgba(47,140,255,.28)",y:.55},{a:80,f:.0025,s:.35,c:"rgba(92,200,255,.2)",y:.65},{a:50,f:.005,s:.7,c:"rgba(223,232,245,.14)",y:.72}];
+ L.forEach((l,k)=>{cx.beginPath();cx.moveTo(0,H);
+  for(let x=0;x<=W;x+=12){const y=H*l.y-sc*.15*(k+1)+Math.sin(x*l.f+t*.0006*l.s*3+sc*.004)*l.a+Math.sin(x*l.f*2.3-t*.0004*l.s)*l.a*.4;cx.lineTo(x,y)}
+  cx.lineTo(W,H);cx.closePath();cx.fillStyle=l.c;cx.fill();
+  cx.strokeStyle="rgba(200,230,255,.25)";cx.lineWidth=1.2;cx.stroke()});
+ for(let i=0;i<40;i++){const x=(i*173+t*.01*(i%3+1))%W,y=(i*97+sc*.2*(i%4+1))%H;cx.fillStyle=`rgba(200,230,255,${.15+.15*Math.sin(t*.002+i)})`;cx.fillRect(x,y,2,2)}
+ requestAnimationFrame(wave)}
+requestAnimationFrame(wave);
+// ====== Killua lightning ======
+const bc=$("#bolt"),bx=bc.getContext("2d");
+function bolt(){bc.width=innerWidth;bc.height=innerHeight;
+ let x=Math.random()*bc.width,y=0,pts=[[x,y]];
+ while(y<bc.height*.6){x+=(Math.random()-.5)*80;y+=20+Math.random()*30;pts.push([x,y])}
+ let a=1;(function f(){bx.clearRect(0,0,bc.width,bc.height);if(a<=0)return;
+  bx.strokeStyle=`rgba(180,225,255,${a})`;bx.shadowColor="#5cc8ff";bx.shadowBlur=24;bx.lineWidth=2.5;
+  bx.beginPath();pts.forEach((p,i)=>i?bx.lineTo(p[0],p[1]):bx.moveTo(p[0],p[1]));bx.stroke();a-=.06;requestAnimationFrame(f)})()}
+// ====== audio (synthesized, no files needed) ======
+let ac,master,started=false,muted=false,musicTimer;
+function initAudio(){ac=new (window.AudioContext||window.webkitAudioContext)();master=ac.createGain();master.gain.value=.5;master.connect(ac.destination)}
+const chords=[[220,261.6,329.6],[174.6,220,261.6],[261.6,329.6,392],[196,246.9,293.7]];
+let step=0;
+function note(f,t,d,v,type){const o=ac.createOscillator(),g=ac.createGain(),lp=ac.createBiquadFilter();
+ o.type=type;o.frequency.value=f;lp.type="lowpass";lp.frequency.value=type==="sine"?3000:900;
+ g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+d*.3);g.gain.exponentialRampToValueAtTime(.0001,t+d);
+ o.connect(lp);lp.connect(g);g.connect(master);o.start(t);o.stop(t+d+.1)}
+function bar(){const t=ac.currentTime+.05,c=chords[step%4];
+ c.forEach(f=>{note(f/2,t,4.2,.05,"triangle");note(f,t,4.2,.035,"sawtooth")});
+ for(let i=0;i<8;i++)note(c[i%3]*2*(i>5?2:1),t+i*.5,1.6,.05,"sine");
+ step++}
+function music(){bar();musicTimer=setInterval(bar,4000)}
+function blip(f){if(!ac||muted)return;const t=ac.currentTime,o=ac.createOscillator(),g=ac.createGain();
+ o.type="sine";o.frequency.setValueAtTime(f,t);o.frequency.exponentialRampToValueAtTime(f*1.6,t+.08);
+ g.gain.setValueAtTime(.12,t);g.gain.exponentialRampToValueAtTime(.0001,t+.12);o.connect(g);g.connect(master);o.start(t);o.stop(t+.15)}
+function chime(){if(!ac||muted)return;[880,1318,1760].forEach((f,i)=>{const t=ac.currentTime+i*.07;note(f,t,.9,.07,"sine")})}
+function whoosh(s){if(!ac||muted)return;const t=ac.currentTime,n=ac.sampleRate*.25,b=ac.createBuffer(1,n,ac.sampleRate),d=b.getChannelData(0);
+ for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*(1-i/n);
+ const src=ac.createBufferSource(),bp=ac.createBiquadFilter(),g=ac.createGain();src.buffer=b;bp.type="bandpass";
+ bp.frequency.setValueAtTime(600+s*40,t);bp.frequency.exponentialRampToValueAtTime(3000,t+.22);bp.Q.value=2;
+ g.gain.setValueAtTime(Math.min(.12+s*.01,.3),t);g.gain.exponentialRampToValueAtTime(.0001,t+.25);
+ src.connect(bp);bp.connect(g);g.connect(master);src.start(t)}
+// ====== scroll sound ======
+let lastY=scrollY,acc=0,lastT=0;
+addEventListener("scroll",()=>{const y=scrollY,d=Math.abs(y-lastY);lastY=y;tsc=y;acc+=d;
+ if(started&&acc>140&&performance.now()-lastT>90){whoosh(Math.min(d,30));blip(300+(y/8)%500);acc=0;lastT=performance.now()}},{passive:true});
+// ====== controls ======
+$("#enter").onclick=()=>{initAudio();ac.resume();started=true;music();$("#gate").classList.add("off");chime();bolt()};
+$("#snd").onclick=()=>{muted=!muted;master.gain.value=muted?0:.5;$("#snd").textContent=muted?"🔇 Sound off":"🔊 Sound on"};
+</script>
+</body>
+</html>
